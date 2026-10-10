@@ -15,6 +15,10 @@ import android.os.IBinder
 import android.os.Looper
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 class HuntLocationService : Service() {
     companion object {
@@ -71,7 +75,7 @@ class HuntLocationService : Service() {
             .put("latitude", location.latitude)
             .put("longitude", location.longitude)
             .put("accuracy", location.accuracy.toInt())
-            .put("capturedAt", java.time.Instant.ofEpochMilli(location.time).toString())
+            .put("capturedAt", SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply { timeZone = TimeZone.getTimeZone("UTC") }.format(Date(location.time)))
         synchronized(this) {
             val samples = try { JSONArray(prefs.getString(KEY_SAMPLES, "[]") ?: "[]") } catch (_: Exception) { JSONArray() }
             samples.put(point)
