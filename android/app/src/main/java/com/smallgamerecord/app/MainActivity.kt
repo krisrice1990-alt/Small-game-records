@@ -8,6 +8,9 @@ import android.webkit.GeolocationPermissions
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.webkit.JavascriptInterface
+import android.content.Intent
+import android.os.Build
 import android.view.ViewGroup
 import android.graphics.Color
 
@@ -34,6 +37,7 @@ class MainActivity : Activity() {
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
         webView.settings.setGeolocationEnabled(true)
+        webView.addJavascriptInterface(HuntTrackingBridge(this), "AndroidHunt")
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = object : WebChromeClient() {
             override fun onGeolocationPermissionsShowPrompt(
@@ -72,6 +76,26 @@ class MainActivity : Activity() {
             pendingGeoOrigin = null
         }
     }
+
+
+class HuntTrackingBridge(private val activity: Activity) {
+    @JavascriptInterface
+    fun startTracking() {
+        val intent = Intent(activity, HuntLocationService::class.java).setAction(HuntLocationService.ACTION_START)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) activity.startForegroundService(intent) else activity.startService(intent)
+    }
+
+    @JavascriptInterface
+    fun stopTracking() {
+        activity.stopService(Intent(activity, HuntLocationService::class.java))
+    }
+
+    @JavascriptInterface
+    fun getSamplesJson(): String {
+        return activity.getSharedPreferences(HuntLocationService.PREFS, Activity.MODE_PRIVATE)
+            .getString(HuntLocationService.KEY_SAMPLES, "[]") ?: "[]"
+    }
+}
 
     override fun onSaveInstanceState(outState: Bundle) {
         webView.saveState(outState)
