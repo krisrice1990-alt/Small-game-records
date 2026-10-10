@@ -10,8 +10,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.view.ViewGroup
 import android.graphics.Color
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
@@ -42,15 +40,14 @@ class MainActivity : Activity() {
                 origin: String,
                 callback: GeolocationPermissions.Callback
             ) {
-                val fine = ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-                val coarse = ContextCompat.checkSelfPermission(this@MainActivity, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val fine = checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val coarse = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
                 if (fine || coarse) {
                     callback.invoke(origin, true, false)
                 } else {
                     pendingGeoOrigin = origin
                     pendingGeoCallback = callback
-                    ActivityCompat.requestPermissions(
-                        this@MainActivity,
+                    requestPermissions(
                         arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
                         locationRequestCode
                     )
