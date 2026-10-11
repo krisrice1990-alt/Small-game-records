@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#17251c">
+<title>Hunting Map Prototype — Small Game Records NL</title>
+<link href="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.css" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#111a14;--panel:#1d2b21;--line:#405344;--text:#f4f5ee;--muted:#bac5bb;--accent:#c2e39a;--danger:#ffb4a9}
+*{box-sizing:border-box}html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font:16px system-ui,sans-serif}
+body{overflow:hidden}#map{position:absolute;inset:0;background:#d9e0d5}.top{position:absolute;top:0;left:0;right:0;z-index:2;padding:12px;pointer-events:none}.brand,.toolbar,.status{pointer-events:auto;background:#142019ed;border:1px solid var(--line);border-radius:14px;box-shadow:0 4px 18px #0005}.brand{padding:10px 14px;max-width:520px;margin:auto}.brand strong{display:block;font-size:17px}.brand small{color:var(--accent)}.toolbar{position:absolute;top:90px;left:12px;display:grid;gap:8px;padding:8px;width:58px}.toolbar button{padding:10px 0;font-size:21px}.bottom{position:absolute;left:12px;right:12px;bottom:12px;z-index:3;display:grid;gap:8px;max-width:600px;margin:auto}.status{padding:10px 12px;font-size:13px;color:var(--muted)}.actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.panel{background:#142019ed;border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:0 4px 18px #0005}button,select{border:1px solid var(--line);border-radius:10px;padding:11px 8px;font:600 14px system-ui,sans-serif;background:var(--accent);color:#152017;cursor:pointer;min-height:42px}button.secondary,select{background:#26382b;color:var(--text)}button:disabled{opacity:.45;cursor:not-allowed}.pill{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:12px;color:var(--muted)}.pill label{display:flex;align-items:center;gap:5px}.pill input{accent-color:var(--accent)}#message{margin-top:6px;color:var(--muted);font-size:12px}.maplibregl-ctrl-attrib{font-size:10px!important}.maplibregl-popup-content{color:#172019;font:14px system-ui,sans-serif;border-radius:10px}.waypoint{font-size:13px;color:var(--muted);max-height:100px;overflow:auto}.warning{color:#ffdf9e}
+@media(min-width:700px){.bottom{left:auto;right:18px;width:400px}.top{left:18px;right:auto;width:360px}.toolbar{top:120px;left:18px}}
+</style>
+</head>
+<body>
+<div id="map" aria-label="Map preview"></div>
+<div class="top"><div class="brand"><small>NEWFOUNDLAND & LABRADOR</small><strong>Hunting Map — Prototype</strong><span style="font-size:12px;color:var(--muted)">Map engine and GPS interaction proof of concept</span></div></div>
+<div class="toolbar">
+<button id="locate" title="Locate me" aria-label="Locate me">◎</button>
+<button id="zoomIn" title="Zoom in" aria-label="Zoom in">＋</button>
+<button id="zoomOut" title="Zoom out" aria-label="Zoom out">−</button>
+<button id="addPin" title="Add waypoint at map centre" aria-label="Add waypoint">📍</button>
+</div>
+<div class="bottom">
+<div class="panel">
+<div class="actions">
+<select id="style" aria-label="Map style"><option value="liberty">Road map</option><option value="bright">Light map</option><option value="positron">Muted map</option></select>
+<button id="track" class="secondary">▶ Start track</button>
+<button id="saveTrack" class="secondary">Save track</button>
+</div>
+<div class="pill" style="margin-top:9px">
+<label><input type="checkbox" id="showPins" checked> Saved waypoints</label>
+<label><input type="checkbox" id="boundaryHint" disabled> Hunting boundaries (data not connected)</label>
+</div>
+<div id="message">Starting map…</div>
+<div id="waypoints" class="waypoint"></div>
+</div>
+<div class="status" id="status">GPS not started. Tap ◎ to request location permission.</div>
+</div>
+<script src="https://unpkg.com/maplibre-gl@5.6.2/dist/maplibre-gl.js"></script>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const styleUrls = {
+  liberty:'https://tiles.openfreemap.org/styles/liberty',
+  bright:'https://tiles.openfreemap.org/styles/bright',
+  positron:'https://tiles.openfreemap.org/styles/positron'
+ };
+ const map = new maplibregl.Map({container:'map',style:styleUrls.liberty,center:[-56.0,48.8],zoom:6.2,attributionControl:true});
+ map.addControl(new maplibregl.NavigationControl({showCompass:true}),'top-right');
+ let userMarker=null, watchId=null, tracking=false, trackCoords=[], lineAdded=false, saved=[];
+ try { saved=JSON.parse(localStorage.getItem('nl-map-waypoints-v1')||'[]'); if(!Array.isArray(saved))saved=[]; } catch(e){saved=[];}
+ function msg(t){$('message').textContent=t}
+ function status(t){$('status').textContent=t}
+ function persist(){try{localStorage.setItem('nl-map-waypoints-v1',JSON.stringify(saved));}catch(e){msg('Device storage unavailable; waypoint was not saved.');}}
+ function renderPins(){
+  $('waypoints').textContent=saved.length ? saved.map((p,i)=>(i+1)+'. '+p.name+' ('+p.lat.toFixed(4)+', '+p.lon.toFixed(4)+')').join(' · ') : 'No saved waypoints yet.';
+  if(!map.isStyleLoaded())return;
+  if(map.getLayer('saved-pins'))map.removeLayer('saved-pins');
+  if(map.getSource('saved-pins'))map.removeSource('saved-pins');
+  map.addSource('saved-pins',{type:'geojson',data:{type:'FeatureCollection',features:saved.map(p=>({type:'Feature',geometry:{type:'Point',coordinates:[p.lon,p.lat]},properties:{name:p.name}}))}});
+  map.addLayer({id:'saved-pins',type:'circle',source:'saved-pins',paint:{'circle-radius':7,'circle-color':'#b6d58b','circle-stroke-color':'#152017','circle-stroke-width':2}});
+  map.on('click','saved-pins',e=>{const f=e.features&&e.features[0];if(f)new maplibregl.Popup().setLngLat(f.geometry.coordinates).setText(f.properties.name).addTo(map);});
+  map.on('mouseenter','saved-pins',()=>map.getCanvas().style.cursor='pointer');
+  map.on('mouseleave','saved-pins',()=>map.getCanvas().style.cursor='');
+  $('showPins').checked ? map.setLayoutProperty('saved-pins','visibility','visible') : map.setLayoutProperty('saved-pins','visibility','none');
+ }
+ function updateTrackLine(){
+  if(!map.isStyleLoaded()||trackCoords.length<2)return;
+  const data={type:'Feature',geometry:{type:'LineString',coordinates:trackCoords},properties:{}};
+  if(map.getSource('track-line'))map.getSource('track-line').setData(data);
+  else {map.addSource('track-line',{type:'geojson',data});map.addLayer({id:'track-line',type:'line',source:'track-line',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#dc704c','line-width':4}});}
+ }
+ function handlePosition(pos){
+  const c=[pos.coords.longitude,pos.coords.latitude];
+  if(!userMarker){userMarker=new maplibregl.Marker({color:'#2879ed'}).setLngLat(c).setPopup(new maplibregl.Popup().setText('Your current GPS position')).addTo(map);}
+  else userMarker.setLngLat(c);
+  if(tracking){const last=trackCoords[trackCoords.length-1];if(!last||Math.abs(last[0]-c[0])+Math.abs(last[1]-c[1])>0.00001){trackCoords.push(c);updateTrackLine();}}
+  const acc=Number.isFinite(pos.coords.accuracy)?Math.round(pos.coords.accuracy):'unknown';
+  status('GPS fix: '+pos.coords.latitude.toFixed(5)+', '+pos.coords.longitude.toFixed(5)+' · accuracy ±'+acc+' m'+(tracking?' · TRACKING ACTIVE':''));
+ }
+ function startGps(){
+  if(!navigator.geolocation){status('Geolocation is not supported here. Use the native Android implementation for reliable GPS.');return;}
+  navigator.geolocation.getCurrentPosition(p=>{handlePosition(p);map.flyTo({center:[p.coords.longitude,p.coords.latitude],zoom:14});msg('Location permission granted. This browser prototype requires location access.');},e=>{status('Could not get GPS: '+e.message+' (check permission and HTTPS).');},{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+ }
+ $('locate').onclick=startGps;
+ $('zoomIn').onclick=()=>map.zoomIn(); $('zoomOut').onclick=()=>map.zoomOut();
+ $('style').onchange=e=>{const center=map.getCenter(),zoom=map.getZoom();map.setStyle(styleUrls[e.target.value]);map.once('style.load',()=>{map.jumpTo({center,zoom});renderPins();updateTrackLine();});msg('Changed online base-map style. Satellite imagery is not included in this prototype.');};
+ $('addPin').onclick=()=>{const c=map.getCenter();const name=prompt('Name this waypoint (for example: Truck, Camp, Hunting Spot):','Hunting spot');if(!name||!name.trim())return;saved.push({name:name.trim().slice(0,80),lon:c.lng,lat:c.lat,createdAt:new Date().toISOString()});persist();renderPins();msg('Waypoint saved on this device.');};
+ $('showPins').onchange=()=>{if(map.getLayer('saved-pins'))map.setLayoutProperty('saved-pins','visibility',$('showPins').checked?'visible':'none');};
+ $('track').onclick=()=>{if(!navigator.geolocation){status('Geolocation is not supported by this browser.');return;}if(!tracking){tracking=true;trackCoords=[];$('track').textContent='■ Stop track';$('track').classList.remove('secondary');watchId=navigator.geolocation.watchPosition(handlePosition,e=>status('GPS tracking error: '+e.message),{enableHighAccuracy:true,maximumAge:2000,timeout:15000});startGps();status('Track recording requested. Keep this screen open; this web prototype does not guarantee background tracking.');}else{tracking=false;if(watchId!==null)navigator.geolocation.clearWatch(watchId);watchId=null;$('track').textContent='▶ Start track';$('track').classList.add('secondary');status('Track stopped. '+trackCoords.length+' GPS points recorded in this session. Save track to export a GPX file.');}};
+ $('saveTrack').onclick=()=>{if(trackCoords.length<2){msg('Record at least two GPS points before saving a track.');return;}const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');const points=trackCoords.map(c=>'<trkpt lon="'+c[0]+'" lat="'+c[1]+'"></trkpt>').join('');const gpx='<?xml version="1.0" encoding="UTF-8"?><gpx version="1.1" creator="Small Game Records NL map prototype" xmlns="http://www.topografix.com/GPX/1/1"><trk><name>Hunting track</name><trkseg>'+points+'</trkseg></trk></gpx>';const blob=new Blob([gpx],{type:'application/gpx+xml'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='hunting-track.gpx';a.click();URL.revokeObjectURL(url);msg('GPX export generated. Test the downloaded file before relying on it.');};
+ map.on('load',()=>{renderPins();msg('Online map loaded. This is a prototype, not the production Android map.');});
+ map.on('error',e=>{if(e&&e.error)msg('Map loading issue: '+e.error.message);});
+ window.addEventListener('beforeunload',()=>{if(watchId!==null)navigator.geolocation.clearWatch(watchId);});
+})();
+</script>
+</body>
+</html>
