@@ -15,16 +15,19 @@ jobs:
           node-version: 22
       - name: Install Capacitor dependencies including iOS platform
         working-directory: ios
-        run: npm install && npm install @capacitor/ios@^7.4.3
+        run: npm install
       - name: Generate iOS project
         working-directory: ios
         run: npx cap add ios
       - name: Copy app into native project
         working-directory: ios
         run: npx cap sync ios
+      - name: Install CocoaPods dependencies
+        working-directory: ios/ios/App
+        run: pod install
       - name: Build iOS Simulator app (unsigned)
         working-directory: ios
-        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath ../build CODE_SIGNING_ALLOWED=NO build
+        run: xcodebuild -workspace ios/App/App.xcworkspace -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath ../build CODE_SIGNING_ALLOWED=NO build
       - name: Package simulator build
         run: cd build/Build/Products/Debug-iphonesimulator && zip -r "$GITHUB_WORKSPACE/Small-Game-Record-NL-iOS-Simulator.zip" App.app
       - uses: actions/upload-artifact@v4
