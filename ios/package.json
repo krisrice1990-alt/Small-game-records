@@ -1,0 +1,16 @@
+{
+  "name": "small-game-records-nl-ios",
+  "version": "1.0.0",
+  "private": true,
+  "description": "iOS wrapper project for Small Game Records NL",
+  "scripts": {
+    "cap:sync": "cap sync ios",
+    "cap:open": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
