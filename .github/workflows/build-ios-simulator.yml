@@ -13,9 +13,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install Capacitor dependencies
+      - name: Install Capacitor dependencies including iOS platform
         working-directory: ios
-        run: npm install
+        run: npm install && npm install @capacitor/ios@^7.4.3
       - name: Generate iOS project
         working-directory: ios
         run: npx cap add ios
