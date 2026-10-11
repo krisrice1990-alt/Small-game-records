@@ -29,6 +29,12 @@ jobs:
         with:
           gradle-version: "8.9"
 
+      - name: Use stable debug signing key for in-place updates
+        run: |
+          mkdir -p "$HOME/.android"
+          base64 --decode android/signing/debug.keystore.b64 > "$HOME/.android/debug.keystore"
+          chmod 600 "$HOME/.android/debug.keystore"
+
       - name: Build debug APK
         run: gradle --no-daemon -p android assembleDebug
 
