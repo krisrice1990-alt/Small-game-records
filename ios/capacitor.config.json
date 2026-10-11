@@ -1,0 +1,8 @@
+{
+  "appId": "ca.smallgamerecords.nl",
+  "appName": "Small Game Record NL",
+  "webDir": "www",
+  "server": {
+    "iosScheme": "capacitor"
+  }
+}
