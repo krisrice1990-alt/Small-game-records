@@ -1,0 +1,33 @@
+name: Build Small Game Record NL iOS Simulator
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ios/**'
+      - '.github/workflows/build-ios-simulator.yml'
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Capacitor dependencies
+        working-directory: ios
+        run: npm install
+      - name: Generate iOS project
+        working-directory: ios
+        run: npx cap add ios
+      - name: Copy app into native project
+        working-directory: ios
+        run: npx cap sync ios
+      - name: Build iOS Simulator app (unsigned)
+        working-directory: ios
+        run: xcodebuild -project ios/App/App.xcodeproj -scheme App -sdk iphonesimulator -configuration Debug -derivedDataPath ../build CODE_SIGNING_ALLOWED=NO build
+      - name: Package simulator build
+        run: cd build/Build/Products/Debug-iphonesimulator && zip -r "$GITHUB_WORKSPACE/Small-Game-Record-NL-iOS-Simulator.zip" App.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Small-Game-Record-NL-iOS-Simulator
+          path: Small-Game-Record-NL-iOS-Simulator.zip
