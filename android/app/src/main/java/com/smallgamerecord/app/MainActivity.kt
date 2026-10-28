@@ -16,6 +16,8 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.ViewGroup
+import android.view.WindowInsets
+import android.widget.FrameLayout
 import android.graphics.Color
 
 class MainActivity : Activity() {
@@ -88,7 +90,20 @@ class MainActivity : Activity() {
                 }
             }
         }
-        setContentView(webView)
+        // Edge-to-edge fix (SDK 35): the app used to draw under the status
+        // bar. Pad the root by the system-bar insets so content sits between
+        // the status bar and the gesture/nav area; the root's dark-brown
+        // background shows behind the bars so they blend with the app.
+        val root = FrameLayout(this)
+        root.setBackgroundColor(Color.rgb(33, 26, 19))
+        root.addView(webView)
+        root.setOnApplyWindowInsetsListener { v, insets ->
+            val bars = insets.getInsets(WindowInsets.Type.systemBars())
+            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            insets
+        }
+        setContentView(root)
+        root.requestApplyInsets()
 
         if (savedInstanceState == null) {
             webView.loadUrl("file:///android_asset/index.html")
@@ -151,8 +166,18 @@ class HuntTrackingBridge(private val activity: Activity) {
         super.onSaveInstanceState(outState)
     }
 
+    private fun defaultBack() {
+        @Suppress("DEPRECATION")
+        super.onBackPressed()
+    }
+
     @Deprecated("Deprecated in Android API")
     override fun onBackPressed() {
-        if (webView.canGoBack()) webView.goBack() else super.onBackPressed()
+        // Ask the page first: Settings -> previous tab, Edit -> Records,
+        // other tabs -> Totals. Only exit when the page says it is at the
+        // top level (returns anything other than "true").
+        webView.evaluateJavascript(
+            "(window.sgrHandleBack ? window.sgrHandleBack() : false)"
+        ) { result -> if (result != "true") defaultBack() }
     }
 }

@@ -14,8 +14,8 @@ android {
         // Explicit versioning: every release bumps versionCode by hand, so
         // the update feed and the system installer can always tell which
         // build is newer — independent of where the APK was built.
-        versionCode = 200
-        versionName = "2.0.0"
+        versionCode = 201
+        versionName = "2.0.1"
     }
 
     compileOptions {
