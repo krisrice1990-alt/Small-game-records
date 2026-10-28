@@ -24,3 +24,8 @@ You can also trigger a build manually from the Actions page using **Run workflow
 This is a personal record book, not an official licence, harvest report, or source of hunting regulations. Verify current Newfoundland and Labrador hunting rules through official government sources. Records are stored on the device and do not automatically sync. Export CSV backups regularly. Uninstalling the app or clearing app data may erase local records.
 
 The APK produced by GitHub Actions is a debug/test build, not a signed Play Store release.
+
+## Plans
+
+- [Photo identification plan](docs/PHOTO-ID-PLAN.md) — design for identifying harvested small game from a photo (AI guesses first, hunter confirms, confirmed photos become learn files for retraining). Saved for later; not built into the app yet.
+- [Dataset plan](docs/DATASET-PLAN.md) — the research behind it: photo sources, licences, and counts per species.
