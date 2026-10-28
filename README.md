@@ -6,6 +6,8 @@ A standalone Android/web app for keeping a personal small-game hunting record in
 - Record species, date, quantity, hunting area/zone, and notes
 - View harvest totals and species counts
 - Search, edit, and delete entries
+- Attach up to 4 photos to a record (camera or gallery); photos are stored as
+  files in the app's private storage — records keep only photo references
 - Export records as CSV; back up / restore all records to a file from Settings
 - Five tabs — Totals, Stats, Add, Live Hunt, Records — plus a Settings screen (gear icon)
 - Works offline; records stay locally on the device

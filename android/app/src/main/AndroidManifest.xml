@@ -16,6 +16,11 @@
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="false">
         <provider
+            android:name=".PhotoProvider"
+            android:authorities="${applicationId}.photos"
+            android:exported="false"
+            android:grantUriPermissions="true" />
+        <provider
             android:name=".ApkProvider"
             android:authorities="${applicationId}.apk"
             android:exported="false"
