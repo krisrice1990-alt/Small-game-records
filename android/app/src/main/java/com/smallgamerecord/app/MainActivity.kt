@@ -9,35 +9,45 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.webkit.JavascriptInterface
+import android.webkit.ValueCallback
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.view.ViewGroup
 import android.graphics.Color
 
 class MainActivity : Activity() {
     private lateinit var webView: WebView
+    private lateinit var updater: AppUpdater
     private var pendingGeoOrigin: String? = null
     private var pendingGeoCallback: GeolocationPermissions.Callback? = null
+    private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val locationRequestCode = 7021
+    private val fileChooserRequestCode = 7022
 
     @Suppress("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        window.statusBarColor = Color.rgb(32, 51, 38)
-        window.navigationBarColor = Color.rgb(16, 24, 18)
+        window.statusBarColor = Color.rgb(33, 26, 19)
+        window.navigationBarColor = Color.rgb(23, 18, 9)
 
         webView = WebView(this)
         webView.layoutParams = ViewGroup.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT,
             ViewGroup.LayoutParams.MATCH_PARENT
         )
-        webView.setBackgroundColor(Color.rgb(16, 24, 18))
+        webView.setBackgroundColor(Color.rgb(33, 26, 19))
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
         webView.settings.allowContentAccess = true
         webView.settings.setGeolocationEnabled(true)
         webView.addJavascriptInterface(HuntTrackingBridge(this), "AndroidHunt")
+        updater = AppUpdater(this, webView)
+        webView.addJavascriptInterface(updater.Bridge(), "AndroidUpdate")
+        webView.addJavascriptInterface(BackupBridge(this), "AndroidBackup")
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = object : WebChromeClient() {
             override fun onGeolocationPermissionsShowPrompt(
@@ -57,6 +67,26 @@ class MainActivity : Activity() {
                     )
                 }
             }
+
+            override fun onShowFileChooser(
+                webView: WebView,
+                filePathCallback: ValueCallback<Array<Uri>>,
+                fileChooserParams: FileChooserParams
+            ): Boolean {
+                fileChooserCallback?.onReceiveValue(null)
+                fileChooserCallback = filePathCallback
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "*/*"
+                }
+                return try {
+                    startActivityForResult(intent, fileChooserRequestCode)
+                    true
+                } catch (e: Exception) {
+                    fileChooserCallback = null
+                    false
+                }
+            }
         }
         setContentView(webView)
 
@@ -64,6 +94,12 @@ class MainActivity : Activity() {
             webView.loadUrl("file:///android_asset/index.html")
         } else {
             webView.restoreState(savedInstanceState)
+        }
+
+        // Automatic update check (Settings can turn this off). Silent unless
+        // a newer version is actually available.
+        if (updater.autoEnabled()) {
+            Handler(Looper.getMainLooper()).postDelayed({ updater.check(manual = false) }, 3000)
         }
     }
 
@@ -74,6 +110,19 @@ class MainActivity : Activity() {
             pendingGeoCallback?.invoke(pendingGeoOrigin, granted, false)
             pendingGeoCallback = null
             pendingGeoOrigin = null
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == fileChooserRequestCode) {
+            val result: Array<Uri>? = if (resultCode == RESULT_OK && data?.data != null) {
+                arrayOf(data.data!!)
+            } else {
+                null
+            }
+            fileChooserCallback?.onReceiveValue(result)
+            fileChooserCallback = null
         }
     }
 

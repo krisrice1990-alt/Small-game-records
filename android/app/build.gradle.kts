@@ -11,10 +11,11 @@ android {
         applicationId = "com.smallgamerecord.app"
         minSdk = 23
         targetSdk = 35
-        // Each GitHub Actions build gets a higher versionCode, so Android can
-        // install it over the previous build without uninstalling the app.
-        versionCode = (System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 2)
-        versionName = "1.0." + (System.getenv("GITHUB_RUN_NUMBER") ?: "2")
+        // Explicit versioning: every release bumps versionCode by hand, so
+        // the update feed and the system installer can always tell which
+        // build is newer — independent of where the APK was built.
+        versionCode = 200
+        versionName = "2.0.0"
     }
 
     compileOptions {
