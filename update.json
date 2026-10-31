@@ -1,0 +1,8 @@
+{
+  "version_code": 225,
+  "version_name": "2.0.25",
+  "apk_url": "https://raw.githubusercontent.com/krisrice1990-alt/Small-game-records/main/SmallGameRecordsNL.apk",
+  "sha256": "39a7a032ee0be1b0451d300f48dd098bed38b0bcffb0faed17401a77a678c011",
+  "size_bytes": 11957336,
+  "notes": "New in 2.0.25: Photo ID now tells the truth when it cannot run. Before, if a photo file was missing or could not be read, the app wrongly said 'not sure (low confidence)' as if the AI had looked at it. Now it says plainly that the AI did not run, and why \u2014 missing file, unreadable photo, or model problem. A real low-confidence result still says 'not sure'. Nothing else changes."
+}
