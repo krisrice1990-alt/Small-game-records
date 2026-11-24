@@ -1,8 +1,8 @@
 {
-  "version_code": 230,
-  "version_name": "2.0.30",
+  "version_code": 231,
+  "version_name": "2.0.31",
   "apk_url": "https://raw.githubusercontent.com/krisrice1990-alt/Small-game-records/main/SmallGameRecordsNL.apk",
-  "sha256": "41ffc56c570ab45efa06fa19221861b89d2f721d48688f72860150f803d264c7",
-  "size_bytes": 2442089,
-  "notes": "New in 2.0.30: the Seasons page now follows your GPS — it shows the small game seasons for the province you are in, all 10 provinces, and you can pick a province by hand too. The app is now just called Small Game Records — no NL in the name, since it covers everywhere."
+  "sha256": "148245869c7aa1d38af411d40d327945223ef1a74c09ec0044e9ba7ec8b22f63",
+  "size_bytes": 2446185,
+  "notes": "New in 2.0.31: updates now finish inside the app — tap Install, tap the system's Install, and the app reopens itself on the new version. No more closing and reopening by hand. Checks also fetch a fresh copy every time, so you won't be told you're up to date when you're not."
 }
