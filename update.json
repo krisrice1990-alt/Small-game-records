@@ -1,8 +1,8 @@
 {
-  "version_code": 228,
-  "version_name": "2.0.28",
+  "version_code": 229,
+  "version_name": "2.0.29",
   "apk_url": "https://raw.githubusercontent.com/krisrice1990-alt/Small-game-records/main/SmallGameRecordsNL.apk",
-  "sha256": "bf1819b8bd97ceec0988f08cc0b745b251f46ee6b10d4cede4f9d0ba642227b4",
-  "size_bytes": 2409321,
-  "notes": "New in 2.0.28: Check for Updates fixed — the app was looking in the old releases repo, which no longer exists; it now checks this repo. End Hunt now stops GPS tracking right away. Photos are plain photos on your records — you pick the species yourself."
+  "sha256": "fa4fac2b06c219ff6bbf7f42e9c4c4ad99c7ed468c5bd01fa688f84202357f8a",
+  "size_bytes": 2429801,
+  "notes": "New in 2.0.29: the app takes photos itself now — no outside camera app. It asks Allow for Camera once when it opens; after that it never asks again. Also fixed photos not saving or showing on some records."
 }
