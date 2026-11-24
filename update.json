@@ -1,8 +1,8 @@
 {
-  "version_code": 225,
-  "version_name": "2.0.25",
+  "version_code": 228,
+  "version_name": "2.0.28",
   "apk_url": "https://raw.githubusercontent.com/krisrice1990-alt/Small-game-records/main/SmallGameRecordsNL.apk",
-  "sha256": "39a7a032ee0be1b0451d300f48dd098bed38b0bcffb0faed17401a77a678c011",
-  "size_bytes": 11957336,
-  "notes": "New in 2.0.25: Photo ID now tells the truth when it cannot run. Before, if a photo file was missing or could not be read, the app wrongly said 'not sure (low confidence)' as if the AI had looked at it. Now it says plainly that the AI did not run, and why \u2014 missing file, unreadable photo, or model problem. A real low-confidence result still says 'not sure'. Nothing else changes."
+  "sha256": "bf1819b8bd97ceec0988f08cc0b745b251f46ee6b10d4cede4f9d0ba642227b4",
+  "size_bytes": 2409321,
+  "notes": "New in 2.0.28: Check for Updates fixed \u2014 the app was looking in the old releases repo, which no longer exists; it now checks this repo. Also includes 2.0.27: Photo ID / AI removed (plain photos stay), and End Hunt now stops GPS tracking right away."
 }
