@@ -1,8 +1,8 @@
 {
-  "version_code": 229,
-  "version_name": "2.0.29",
+  "version_code": 230,
+  "version_name": "2.0.30",
   "apk_url": "https://raw.githubusercontent.com/krisrice1990-alt/Small-game-records/main/SmallGameRecordsNL.apk",
-  "sha256": "fa4fac2b06c219ff6bbf7f42e9c4c4ad99c7ed468c5bd01fa688f84202357f8a",
-  "size_bytes": 2429801,
-  "notes": "New in 2.0.29: the app takes photos itself now — no outside camera app. It asks Allow for Camera once when it opens; after that it never asks again. Also fixed photos not saving or showing on some records."
+  "sha256": "41ffc56c570ab45efa06fa19221861b89d2f721d48688f72860150f803d264c7",
+  "size_bytes": 2442089,
+  "notes": "New in 2.0.30: the Seasons page now follows your GPS — it shows the small game seasons for the province you are in, all 10 provinces, and you can pick a province by hand too. The app is now just called Small Game Records — no NL in the name, since it covers everywhere."
 }
